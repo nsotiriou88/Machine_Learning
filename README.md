@@ -1,37 +1,61 @@
-## Welcome to GitHub Pages
+# Machine_Learning
 
-You can use the [editor on GitHub](https://github.com/nsotiriou88/Machine_Learning/edit/master/README.md) to maintain and preview the content for your website in Markdown files.
+## Intro
 
-Whenever you commit to this repository, GitHub Pages will run [Jekyll](https://jekyllrb.com/) to rebuild the pages in your site, from the content in your Markdown files.
+This is a repo for Machince learning algorithms; Python and R.
 
-### Markdown
+It includes a lot of commends on each individual template, so that it is easier to use it as an off-the-shelf solution, with minimal effort.
 
-Markdown is a lightweight and easy-to-use syntax for styling your writing. It includes conventions for
+## Parts
 
-```markdown
-Syntax highlighted code block
+1. **Data Prepocessing**
 
-# Header 1
-## Header 2
-### Header 3
+    Clearing datasets, create categorical variables, separate training/test sets.
 
-- Bulleted
-- List
+2. **Regression Algorithms**
 
-1. Numbered
-2. List
+	Simple Linear, Multiple Linear, Polynomial, Support Vector, Decision Trees, Random Forest.
 
-**Bold** and _Italic_ and `Code` text
+3. **Classification Algorithms**
 
-[Link](url) and ![Image](src)
-```
+	Logistic Regression, KNN, SVM, Kernel SVM, Naive Bayes, Decision Trees, Random Forest.
 
-For more details see [GitHub Flavored Markdown](https://guides.github.com/features/mastering-markdown/).
+4. **Clustering**
 
-### Jekyll Themes
+	K-means and Hierarchical clustering.
 
-Your Pages site will use the layout and styles from the Jekyll theme you have selected in your [repository settings](https://github.com/nsotiriou88/Machine_Learning/settings). The name of this theme is saved in the Jekyll `_config.yml` configuration file.
+5. **Association Rule Learning**
 
-### Support or Contact
+	Apriori and Eclat.
 
-Having trouble with Pages? Check out our [documentation](https://help.github.com/categories/github-pages-basics/) or [contact support](https://github.com/contact) and we’ll help you sort it out.
+6. **Reinforcement Learning**
+
+	Upper Confidence Bound (UCB) and Thompson Sampling.
+
+7. **Natural Language Processing**
+
+	NLP template.
+
+8. **Deep Learning**
+
+	Neural Networks: ANNs and CNN (image recognition) with Keras and TensorFlow.
+
+9. **Dimensionality Reduction**
+
+	Principal Component Analysis (PCA), Linear Discriminant Analysis (LDA) and Kernel PCA.
+
+10. **Model Selection + XGBoosting**
+
+	Model Selection techniques (Grid Search and k-fold Cross Validation) and XGBoost Algorithm.
+
+11. **Multi-Output Models**
+
+	Examples of Model techniques for multiple output dependent variables. MultiOutputRegressor sklearn Class examples.
+
+## Material Folders
+
+Folders that include interesting reading and coding material.
+
+## Other Info
+
+The main Python libraries used in this repo are: pandas, numpy, scipy, sklearn, matplotlib, keras, jupyter instructions and tensorflow for ANNs.

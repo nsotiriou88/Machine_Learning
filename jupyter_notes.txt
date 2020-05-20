@@ -1,0 +1,3 @@
+# Run Jupyter without restrictions for data transfer pipeline (for Plotly slider)
+
+jupyter notebook --NotebookApp.iopub_data_rate_limit=1e10

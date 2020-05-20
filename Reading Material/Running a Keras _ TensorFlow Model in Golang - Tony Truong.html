@@ -1,0 +1,573 @@
+<!DOCTYPE html>
+<!-- saved from url=(0070)https://www.tonytruong.net/running-a-keras-tensorflow-model-in-golang/ -->
+<html><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+  
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+
+  <title>Running a Keras / TensorFlow Model in Golang - Tony Truong</title>
+
+  <meta name="HandheldFriendly" content="True">
+<meta name="MobileOptimized" content="320">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+
+
+<!--
+<link rel="shortcut icon" href="/assets/img/favicon.ico">
+<link rel="apple-touch-icon" sizes="57x57" href="/assets/img/apple-touch-icon-57x57.png">
+<link rel="apple-touch-icon" sizes="114x114" href="/assets/img/apple-touch-icon-114x114.png">
+<link rel="apple-touch-icon" sizes="72x72" href="/assets/img/apple-touch-icon-72x72.png">
+<link rel="apple-touch-icon" sizes="144x144" href="/assets/img/apple-touch-icon-144x144.png">
+<link rel="apple-touch-icon" sizes="60x60" href="/assets/img/apple-touch-icon-60x60.png">
+<link rel="apple-touch-icon" sizes="120x120" href="/assets/img/apple-touch-icon-120x120.png">
+<link rel="apple-touch-icon" sizes="76x76" href="/assets/img/apple-touch-icon-76x76.png">
+<link rel="apple-touch-icon" sizes="152x152" href="/assets/img/apple-touch-icon-152x152.png">
+<link rel="apple-touch-icon" sizes="180x180" href="/assets/img/apple-touch-icon-180x180.png">
+<link rel="icon" type="image/png" href="/assets/img/favicon-192x192.png" sizes="192x192">
+<link rel="icon" type="image/png" href="/assets/img/favicon-160x160.png" sizes="160x160">
+<link rel="icon" type="image/png" href="/assets/img/favicon-96x96.png" sizes="96x96">
+<link rel="icon" type="image/png" href="/assets/img/favicon-16x16.png" sizes="16x16">
+<link rel="icon" type="image/png" href="/assets/img/favicon-32x32.png" sizes="32x32">
+-->
+<meta name="msapplication-TileColor" content="#00a300">
+<meta name="msapplication-TileImage" content="/assets/img/mstile-144x144.png">
+<meta name="msapplication-config" content="/assets/img/browserconfig.xml">
+
+  <link rel="stylesheet" type="text/css" href="./Running a Keras _ TensorFlow Model in Golang - Tony Truong_files/uno.css">
+  <link rel="stylesheet" type="text/css" href="./Running a Keras _ TensorFlow Model in Golang - Tony Truong_files/prism.css">
+  <link rel="canonical" href="https://www.tonytruong.net/running-a-keras-tensorflow-model-in-golang/">
+    <meta name="referrer" content="no-referrer-when-downgrade">
+    <link rel="amphtml" href="https://www.tonytruong.net/running-a-keras-tensorflow-model-in-golang/amp/">
+    
+    <meta property="og:site_name" content="Tony Truong">
+    <meta property="og:type" content="article">
+    <meta property="og:title" content="Running a Keras / TensorFlow Model in Golang">
+    <meta property="og:description" content="Today we&#39;re looking at running inference / forward pass on a neural network model in Golang. If you&#39;re a beginner like me, using a framework like Keras, makes writing deep learning algorithms significantly easier. If you&#39;re very fresh to deep learning, please have a look at my previous post: Deep Learning,">
+    <meta property="og:url" content="https://www.tonytruong.net/running-a-keras-tensorflow-model-in-golang/">
+    <meta property="og:image" content="https://www.tonytruong.net/content/images/2018/04/chest-xray-1.png">
+    <meta property="article:published_time" content="2018-04-02T13:10:15.000Z">
+    <meta property="article:modified_time" content="2018-04-03T11:53:13.000Z">
+    <meta property="article:tag" content="MachineLearning">
+    <meta property="article:tag" content="Golang">
+    <meta property="article:tag" content="Deep Learning">
+    <meta property="article:tag" content="TensorFlow">
+    <meta property="article:tag" content="Keras">
+    
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="Running a Keras / TensorFlow Model in Golang">
+    <meta name="twitter:description" content="Today we&#39;re looking at running inference / forward pass on a neural network model in Golang. If you&#39;re a beginner like me, using a framework like Keras, makes writing deep learning algorithms significantly easier. If you&#39;re very fresh to deep learning, please have a look at my previous post: Deep Learning,">
+    <meta name="twitter:url" content="https://www.tonytruong.net/running-a-keras-tensorflow-model-in-golang/">
+    <meta name="twitter:image" content="https://www.tonytruong.net/content/images/2018/04/chest-xray-1.png">
+    <meta name="twitter:label1" content="Written by">
+    <meta name="twitter:data1" content="Tony Truong">
+    <meta name="twitter:label2" content="Filed under">
+    <meta name="twitter:data2" content="MachineLearning, Golang, Deep Learning, TensorFlow, Keras">
+    <meta name="twitter:site" content="@tonykqt">
+    <meta property="og:image:width" content="373">
+    <meta property="og:image:height" content="264">
+    
+    <script type="text/javascript" async="" src="./Running a Keras _ TensorFlow Model in Golang - Tony Truong_files/linkid.js"></script><script async="" src="./Running a Keras _ TensorFlow Model in Golang - Tony Truong_files/analytics.js"></script><script type="application/ld+json">
+{
+    "@context": "https://schema.org",
+    "@type": "Article",
+    "publisher": {
+        "@type": "Organization",
+        "name": "Tony Truong",
+        "logo": "https://www.tonytruong.net/content/images/2014/Jun/codemonkey_avatar-1.png"
+    },
+    "author": {
+        "@type": "Person",
+        "name": "Tony Truong",
+        "url": "https://www.tonytruong.net/author/tony-truong/",
+        "sameAs": []
+    },
+    "headline": "Running a Keras / TensorFlow Model in Golang",
+    "url": "https://www.tonytruong.net/running-a-keras-tensorflow-model-in-golang/",
+    "datePublished": "2018-04-02T13:10:15.000Z",
+    "dateModified": "2018-04-03T11:53:13.000Z",
+    "image": {
+        "@type": "ImageObject",
+        "url": "https://www.tonytruong.net/content/images/2018/04/chest-xray-1.png",
+        "width": 373,
+        "height": 264
+    },
+    "keywords": "MachineLearning, Golang, Deep Learning, TensorFlow, Keras",
+    "description": "Today we&#x27;re looking at running inference / forward pass on a neural network model in Golang. If you&#x27;re a beginner like me, using a framework like Keras, makes writing deep learning algorithms significantly easier. If you&#x27;re very fresh to deep learning, please have a look at my previous post: Deep Learning,",
+    "mainEntityOfPage": {
+        "@type": "WebPage",
+        "@id": "https://www.tonytruong.net"
+    }
+}
+    </script>
+
+    <meta name="generator" content="Ghost 0.11">
+    <link rel="alternate" type="application/rss+xml" title="Tony Truong" href="https://www.tonytruong.net/rss/">
+
+<script type="text/javascript" async="" src="./Running a Keras _ TensorFlow Model in Golang - Tony Truong_files/embed.js"></script><link rel="preload" as="style" href="https://c.disquscdn.com/next/embed/styles/lounge.a23d3336e8b7e07b2d7d087a82db3283.css"><link rel="preload" as="script" href="https://c.disquscdn.com/next/embed/common.bundle.18932c85febf9520158697cdc31f08ae.js"><link rel="preload" as="script" href="https://c.disquscdn.com/next/embed/lounge.bundle.cc61696b051d0ab202a6e9f6041f40df.js"><link rel="preload" as="script" href="https://disqus.com/next/config.js"><style id="fit-vids-style">.fluid-width-video-wrapper{width:100%;position:relative;padding:0;}.fluid-width-video-wrapper iframe,.fluid-width-video-wrapper object,.fluid-width-video-wrapper embed {position:absolute;top:0;left:0;width:100%;height:100%;}</style></head>
+<body class="post-template tag-machinelearning tag-golang tag-deep-learning tag-tensorflow tag-keras  pace-done" data-page="post" data-device="desktop"><div class="pace  pace-inactive"><div class="pace-progress" data-progress-text="100%" data-progress="99" style="transform: translate3d(100%, 0px, 0px);">
+  <div class="pace-progress-inner"></div>
+</div>
+<div class="pace-activity"></div></div>
+
+  <section id="menu-button" class="expanded">
+    <a><i class="icon icon-list"></i></a>
+  </section>
+
+  <aside class="cover">
+
+  <div class="cover container">
+    <div class="profile">
+      <a id="avatar-link" title="link to homepage for Tony Truong" href="https://www.tonytruong.net/#open">
+        <img src="./Running a Keras _ TensorFlow Model in Golang - Tony Truong_files/codemonkey_avatar-1.png" alt="Tony Truong avatar" class="profile avatar hvr-buzz-out">
+        <h1>Tony Truong</h1>
+        <h3 id="profile-resume">Development blog on .NET, javascript and stuff that runs on the JVM</h3>
+      </a>
+
+      <hr class="divider long">
+      <p>A Software Engineer's Ramblings</p>
+      <hr class="divider short">
+      <div class="navigation">
+        <div class="profile contact">
+          <nav class="navigation left">
+  <ul class="links">
+    <li class="links item">
+      <a href="https://www.tonytruong.net/#open" class="link-item" title="link to Tony Truong blog" id="blog-button">Blog</a>
+      <a href="mailto:truong.tony@live.com" class="link-item" title="" id="contact-button">Contact</a>
+    </li>
+  </ul>
+</nav>
+          
+<nav class="navigation right">
+  <ul class="social expanded">
+
+  <!-- Twitter -->
+  <li class="social item hvr-grow-rotate">
+    <a target="blank" href="https://twitter.com/tonykqt" title="@tonykqt on Twitter">
+      <i class="icon icon-social-twitter"></i>
+      <span class="label">Twitter</span>
+    </a>
+  </li>
+
+  <!-- Linkedin -->
+  <li class="social item hvr-grow-rotate">
+    <a target="blank" href="https://linkedin.com/in/truongt" title="Tony on LinkedIn">
+      <i class="icon icon-social-linkedin"></i>
+      <span class="label">Linkedin</span>
+    </a>
+  </li>
+
+  <!-- Github 
+  <li class="social item hvr-grow-rotate">
+    <a target="blank" href="https://github.com/Kikobeats" title="Kikobeats on Github">
+      <i class='icon icon-social-github'></i>
+      <span class="label">Github</span>
+    </a>
+  </li>
+-->
+  <!-- RSS -->
+  <li class="social item hvr-grow-rotate">
+    <a href="https://www.tonytruong.net/rss/" title="Subscribe to RSS">
+      <i class="icon icon-rss"></i>
+      <span class="label">RSS</span>
+    </a>
+  </li>
+
+  </ul>
+</nav>
+          <section class="icon icon-search" id="search-container">
+  <hr class="divider short">
+  <form id="search-form">
+    <input type="text" ,="" name="search" placeholder="git, css, javascript,..." id="search-field">
+  </form>
+</section>
+        </div>
+      </div>
+    </div>
+  </div>
+</aside>
+
+  <article class="main">
+    <section id="search-results"></section>
+    <section class="content">
+      
+
+  <article class="post tag-machinelearning tag-golang tag-deep-learning tag-tensorflow tag-keras">
+    <header>
+      <a id="back-button" class="btn small square" href="javascript:history.back()">« Back</a>
+      <div class="post meta">
+        <time datetime="02 Apr 2018">199 days ago</time>
+        <span class="post tags">in <a href="https://www.tonytruong.net/tag/machinelearning/">MachineLearning</a> <a href="https://www.tonytruong.net/tag/golang/">Golang</a> <a href="https://www.tonytruong.net/tag/deep-learning/">Deep Learning</a> <a href="https://www.tonytruong.net/tag/tensorflow/">TensorFlow</a> <a href="https://www.tonytruong.net/tag/keras/">Keras</a></span>
+        <span class="post reading-time"> – <span>8 min</span> read.</span>
+      </div>
+
+      <a id="share_twitter" alt="Tweet &#39;Running a Keras / TensorFlow Model in Golang&#39;" target="_blank" href="http://twitter.com/share?url=https%3A%2F%2Fwww.tonytruong.net%2Frunning-a-keras-tensorflow-model-in-golang%2F&amp;text=Running%20a%20Keras%20%2F%20TensorFlow%20Model%20in%20Golang%20%C2%BB">
+        <img id="post-image" src="./Running a Keras _ TensorFlow Model in Golang - Tony Truong_files/chest-xray-1.png" alt="Running a Keras / TensorFlow Model in Golang">
+        <h1 class="icon-reverse icon-social-twitter-post" id="post-title">Running a Keras / TensorFlow Model in Golang.</h1>
+      </a>
+    </header>
+
+    <section class="post tag-machinelearning tag-golang tag-deep-learning tag-tensorflow tag-keras">
+      <p>Today we're looking at running inference / forward pass on a neural network model in Golang. If you're a beginner like me, using a framework like Keras, makes writing deep learning algorithms significantly easier. If you're very fresh to deep learning, please have a look at my previous post: <a href="https://www.tonytruong.net/deep-learning-bottom-up/">Deep Learning, Bottom Up</a>. </p>
+
+<p>But why run it in Go? There are several reasons why that would be beneficial:</p>
+
+<ul>
+<li>Current infrastructure is already running Kubernetes / Docker containers and Golang makes the binaries extremely small and efficient</li>
+<li>Web frameworks for Go are much faster than the Python ones</li>
+<li>The team aren't necessarily data scientists working in Python and work in Go</li>
+<li>Pushing data internally using GRPC for faster communication between micro services</li>
+</ul>
+
+<p>There are some caveats and things we need to watch out for when doing so and I'll get to them in a bit. The high level process is:</p>
+
+<ol>
+<li>Build, and Train the model using Keras  </li>
+<li>Use a TF session with <code>keras.backend</code> when building and training the model  </li>
+<li>Name the input layer and output layer in the model (we'll see why later)  </li>
+<li>Use that TF session to save the model as a computation graph with the variables (the normal in keras is hdf5 but we skip that)  </li>
+<li>Load up the model in Go and run inference</li>
+</ol>
+
+<p>The full code can be found on my Github page for the more savvy folks: <a href="https://github.com/serinth/chestrays-ml-classification">https://github.com/serinth/chestrays-ml-classification</a></p>
+
+<p>I'll only be pulling out snippets of the code that are relevant in the rest of the article. If something isn't clear, please refer to the python notebook. You should be able to get the idea without reading every line though.</p>
+
+<h1 id="binaryclassificationwithkeras">Binary Classification with Keras</h1>
+
+<p>The dataset of chest x-rays is in good resolution and the CSV is very clean and well labelled. You can get it from <a href="https://www.nih.gov/news-events/news-releases/nih-clinical-center-provides-one-largest-publicly-available-chest-x-ray-datasets-scientific-community">here</a>. It's about ~150GB of 1024x1024 PNGs. After putting the data into a CSV and taking a quick peek with pandas, we see corresponding images and data look like this:</p>
+
+<p>Pandas <code>df.head()</code>  </p>
+
+<div class="image-div" style="width: 100%;">  
+<img src="./Running a Keras _ TensorFlow Model in Golang - Tony Truong_files/chestrays-csv-head.jpg" alt="chest x-ray csv">
+</div>  
+
+<p>Plot one of the images in the notebook:  </p>
+
+<div class="image-div" style="width: 373px;">  
+<img src="./Running a Keras _ TensorFlow Model in Golang - Tony Truong_files/chest-xray.png" alt="chest xray">
+</div>
+
+<p>Okay so the only 2 columns we care about are the image file names and the labels. I'd like to classify whether or not there was <strong>No Finding</strong> or if it was say...<strong>Atelectasis</strong>.</p>
+
+<h2 id="preppingthedataforkerasimagegenerator">Prepping the Data For Keras Image Generator</h2>
+
+<p>Keras has a nice way of building models using <a href="https://keras.io/preprocessing/image/#imagedatagenerator">generators</a> so that's what we'll do here. It automatically picks up the labels based on the folder structure so I have the following:</p>
+
+<pre class=" language-bash"><code class=" language-bash"><span class="token punctuation">.</span><span class="token operator">/</span>train<span class="token operator">/</span>NoFinding
+<span class="token punctuation">.</span><span class="token operator">/</span>train<span class="token operator">/</span>Atelectasis
+
+<span class="token punctuation">.</span><span class="token operator">/</span><span class="token function">test</span><span class="token operator">/</span>NoFinding
+<span class="token punctuation">.</span><span class="token operator">/</span><span class="token function">test</span><span class="token operator">/</span>Atelectasis
+</code></pre>
+
+<p>The generator will automatically pick the folder name as the label. We just need to write a bit of code to put the images in the right folders. You can have a look at the full source for the imported variables but the ones you need to here are:</p>
+
+<pre><code class="language-python">toClassify="Atelectasis"  
+train_rows=3600 # arbitrarily picked a smaller number which we'll read from the csv  
+test_rows=400  
+</code></pre>
+
+<p>The rest are pretty self explanatory or you can infer its meaning.</p>
+
+<pre><code class="language-python"># Prepare train and test sets
+
+# Factorize the labels and make the directories, convert all | to _'s, remove spaces
+labels, names = pd.factorize(df[1])  
+image_names = image_dir + df.iloc[0:rows,0].values
+
+# data mover function, also populates the dictionary so we can see the distribution of data
+def copyImages(dataframe, idx, directory="train"):  
+    classification = dataframe.iloc[idx][1].replace(" ","").replace("|","_")
+    source = image_dir + dataframe.iloc[idx][0]
+    destination = directory + "/"
+
+    if classification == "NoFinding":
+        shutil.copy(source, destination + "NoFinding")
+    elif classification.find(toClassify) &gt;= 0:
+        shutil.copy(source, destination + toClassify)
+
+
+# Make classification directories
+pathlib.Path("train/" + "NoFinding").mkdir(parents=True, exist_ok=True)  
+pathlib.Path("train/" + toClassify).mkdir(parents=True, exist_ok=True)  
+pathlib.Path("test/" + "NoFinding").mkdir(parents=True, exist_ok=True)  
+pathlib.Path("test/" + toClassify).mkdir(parents=True, exist_ok=True)
+
+
+for r in range(train_rows):  
+    copyImages(df, r, "train")
+
+for r in range(test_rows):  
+    copyImages(df, train_rows + r, "test")
+</code></pre>
+
+<h2 id="buildthemodel">Build the Model</h2>
+
+<p>Now to build the NN Model. The code itself is very short and concise which is why I really like Keras.</p>
+
+<pre><code class="language-python">sess = tf.Session()  
+K.set_session(sess)  
+model = Sequential()
+
+model.add(Conv2D(32, (3, 3), activation='relu', input_shape=(IMG_WIDTH, IMG_HEIGHT, CH), name="inputLayer"))  
+model.add(Conv2D(32, (3, 3), activation='relu'))  
+model.add(MaxPooling2D(pool_size=(2, 2)))
+
+model.add(Flatten())  
+model.add(Dense(64, activation='relu'))  
+model.add(Dropout(0.25))  
+model.add(Dense(1, activation='sigmoid', name="inferenceLayer"))
+
+sgd = optimizers.SGD(lr=0.01, momentum=0.0, decay=0.0, nesterov=False)  
+model.compile(loss='binary_crossentropy', optimizer=sgd, metrics=["accuracy"])  
+</code></pre>
+
+<p><code>K</code> is <code>from keras import backend as K</code></p>
+
+<p>There are 3 main important points to make this work with Golang:</p>
+
+<ol>
+<li>We initiated a <code>tf.Session()</code>. We need to do this to save it as a computation graph later. Normally you wouldn't need to do this at all in Keras.  </li>
+<li>The input layer is named <strong>"inputLayer"</strong> that's the first node we need to know when running inference  </li>
+<li>The final output is our desired result and so that layer is called <strong>"inferenceLayer"</strong></li>
+</ol>
+
+<p>The Go bindings execute operations on the graph and so it needs to know the node names.</p>
+
+<h2 id="listingallthenodesofthecomputationgraph">Listing all the Nodes of the Computation Graph</h2>
+
+<p>At this point we can actually show what the node names are by running:  </p>
+
+<pre><code class="language-python">[n.name for n in tf.get_default_graph().as_graph_def().node]
+</code></pre>
+
+<p>Here's a shortened version of the list:  </p>
+
+<pre class=" language-javascript"><code class=" language-javascript"><span class="token punctuation">[</span><span class="token string">'inputLayer_input'</span><span class="token punctuation">,</span>
+ <span class="token string">'inputLayer/random_uniform/shape'</span><span class="token punctuation">,</span>
+ <span class="token string">'inputLayer/random_uniform/min'</span><span class="token punctuation">,</span>
+ <span class="token string">'inputLayer/random_uniform/max'</span><span class="token punctuation">,</span>
+ <span class="token string">'inputLayer/random_uniform/RandomUniform'</span><span class="token punctuation">,</span>
+<span class="token punctuation">.</span><span class="token punctuation">.</span><span class="token punctuation">.</span>
+<span class="token string">'inferenceLayer/bias'</span><span class="token punctuation">,</span>  
+ <span class="token string">'inferenceLayer/bias/Assign'</span><span class="token punctuation">,</span>
+ <span class="token string">'inferenceLayer/bias/read'</span><span class="token punctuation">,</span>
+ <span class="token string">'inferenceLayer/MatMul'</span><span class="token punctuation">,</span>
+ <span class="token string">'inferenceLayer/BiasAdd'</span><span class="token punctuation">,</span>
+ <span class="token string">'inferenceLayer/Sigmoid'</span><span class="token punctuation">,</span>
+ <span class="token string">'SGD/iterations/initial_value'</span><span class="token punctuation">,</span>
+ <span class="token string">'SGD/iterations'</span><span class="token punctuation">,</span>
+<span class="token punctuation">.</span><span class="token punctuation">.</span><span class="token punctuation">.</span>
+<span class="token number">164</span> rows <span class="token keyword">in</span> total  
+</code></pre>
+
+<p>The ones we're interested in are: <code>inputLayer_input</code> and <code>inferenceLayer/Sigmoid</code>. Notice that it isn't what we actually named it. That's because Keras/TF appends different numbers and values to it to make it unique. Numbers may be added at the end depending on the number of times you run the model. We named it anyway in the code to make it easier to find.</p>
+
+<p>So if we actually run this model at a later date and export it, our Go code needs to change to correspond to the new node names otherwise it will just chuck an error.</p>
+
+<p>So when we run the generator we get this output:  </p>
+
+<pre><code class="language-python">Found 1865 images belonging to 2 classes.  
+Found 683 images belonging to 2 classes.  
+{'Atelectasis': 0, 'NoFinding': 1}
+</code></pre>
+
+<p>Anything classified as a 0 is Atelectasis, anything classified as a 1 is No finding. Keras will give us a 0 or a 1 when we run <code>model.predict_classes(input)</code>. However, since we pulled out the last Sigmoid function, we'll get a value between 0 and 1. It's the same idea, we can use a threshold value to determine when it's a 0 and when it's a 1.</p>
+
+<p>Alright now run the model and then save the output with:</p>
+
+<pre><code class="language-python"># Use TF to save the graph model instead of Keras save model to load it in Golang
+builder = tf.saved_model.builder.SavedModelBuilder("myModel")  
+# Tag the model, required for Go
+builder.add_meta_graph_and_variables(sess, ["myTag"])  
+builder.save()  
+sess.close()  
+</code></pre>
+
+<p>Important notes here:</p>
+
+<ol>
+<li>The model is saved in a folder called <code>myModel</code>  </li>
+<li>The graph is tagged with <code>myTag</code></li>
+</ol>
+
+<p>This generates all the protobuf, variables and graph as binary in the <code>myModel</code> folder. We'll need these string values in the Go code.</p>
+
+<h2 id="loadingandrunningthemodelingo">Loading and Running the Model in Go</h2>
+
+<p>Here's the code in its entirety:  </p>
+
+<pre><code class="language-go">package main
+
+import (  
+    "fmt"
+
+    tf "github.com/tensorflow/tensorflow/tensorflow/go"
+)
+
+func main() {  
+    // replace myModel and myTag with the appropriate exported names in the chestrays-keras-binary-classification.ipynb
+    model, err := tf.LoadSavedModel("myModel", []string{"myTag"}, nil)
+
+    if err != nil {
+        fmt.Printf("Error loading saved model: %s\n", err.Error())
+        return
+    }
+
+    defer model.Session.Close()
+
+    tensor, _ := tf.NewTensor([1][250][250][3]float32{})
+
+    result, err := model.Session.Run(
+        map[tf.Output]*tf.Tensor{
+            model.Graph.Operation("inputLayer_input").Output(0): tensor, // Replace this with your input layer name
+        },
+        []tf.Output{
+            model.Graph.Operation("inferenceLayer/Sigmoid").Output(0), // Replace this with your output layer name
+        },
+        nil,
+    )
+
+    if err != nil {
+        fmt.Printf("Error running the session with input, err: %s\n", err.Error())
+        return
+    }
+
+    fmt.Printf("Result value: %v \n", result[0].Value())
+
+}
+</code></pre>
+
+<p>Pretty self explanatory of why we needed those strings.</p>
+
+<p>The tensor we input is in the shape <code>[batch size][width][height][channels]</code>. <br>
+In this case we just used empty dummy values but to actually use it, we need to convert an image into those dimensions.</p>
+
+<p>I trained the model on Windows 10 with an Nvidia GTX 970 (4GB). Found out later that the Go bindings only work on Linux and Mac. So I actually copied the <code>myModel</code> folder over to my Linux machine and ran the Go code. </p>
+
+<p>You'll need to <a href="https://www.tensorflow.org/install/install_go">install the Go bindings</a> and also run <code>go get github.com/tensorflow/tensorflow/tensorflow/go</code>.</p>
+
+<p>A successful run should yield something like this:</p>
+
+<pre class=" language-bash"><code class=" language-bash"><span class="token punctuation">(</span>ML<span class="token punctuation">)</span> tony@tony<span class="token operator">-</span>nuc<span class="token punctuation">:</span><span class="token property">$GOPATH</span><span class="token operator">/</span>src<span class="token operator">/</span>github<span class="token punctuation">.</span>com<span class="token operator">/</span>serinth<span class="token operator">/</span>chestrays<span class="token operator">-</span>ml<span class="token operator">-</span>classification$ go run main<span class="token punctuation">.</span>go
+<span class="token number">2018</span><span class="token operator">-</span><span class="token number">04</span><span class="token operator">-</span><span class="token number">02</span> <span class="token number">20</span><span class="token punctuation">:</span><span class="token number">30</span><span class="token punctuation">:</span><span class="token number">51.905087</span><span class="token punctuation">:</span> I tensorflow<span class="token operator">/</span>core<span class="token operator">/</span>platform<span class="token operator">/</span>cpu_feature_guard<span class="token punctuation">.</span>cc<span class="token punctuation">:</span><span class="token number">140</span><span class="token punctuation">]</span> Your CPU supports instructions that this TensorFlow binary was not compiled to use<span class="token punctuation">:</span> SSE4<span class="token punctuation">.</span>1 SSE4<span class="token punctuation">.</span>2 AVX AVX2 FMA  
+<span class="token number">2018</span><span class="token operator">-</span><span class="token number">04</span><span class="token operator">-</span><span class="token number">02</span> <span class="token number">20</span><span class="token punctuation">:</span><span class="token number">30</span><span class="token punctuation">:</span><span class="token number">51.905281</span><span class="token punctuation">:</span> I tensorflow<span class="token operator">/</span>cc<span class="token operator">/</span>saved_model<span class="token operator">/</span>loader<span class="token punctuation">.</span>cc<span class="token punctuation">:</span><span class="token number">240</span><span class="token punctuation">]</span> Loading SavedModel with tags<span class="token punctuation">:</span> <span class="token punctuation">{</span> myTag <span class="token punctuation">}</span><span class="token punctuation">;</span> from<span class="token punctuation">:</span> myModel  
+<span class="token number">2018</span><span class="token operator">-</span><span class="token number">04</span><span class="token operator">-</span><span class="token number">02</span> <span class="token number">20</span><span class="token punctuation">:</span><span class="token number">30</span><span class="token punctuation">:</span><span class="token number">51.913855</span><span class="token punctuation">:</span> I tensorflow<span class="token operator">/</span>cc<span class="token operator">/</span>saved_model<span class="token operator">/</span>loader<span class="token punctuation">.</span>cc<span class="token punctuation">:</span><span class="token number">159</span><span class="token punctuation">]</span> Restoring SavedModel bundle<span class="token punctuation">.</span>  
+<span class="token number">2018</span><span class="token operator">-</span><span class="token number">04</span><span class="token operator">-</span><span class="token number">02</span> <span class="token number">20</span><span class="token punctuation">:</span><span class="token number">30</span><span class="token punctuation">:</span><span class="token number">52.121236</span><span class="token punctuation">:</span> I tensorflow<span class="token operator">/</span>cc<span class="token operator">/</span>saved_model<span class="token operator">/</span>loader<span class="token punctuation">.</span>cc<span class="token punctuation">:</span><span class="token number">194</span><span class="token punctuation">]</span> Running LegacyInitOp on SavedModel bundle<span class="token punctuation">.</span>  
+<span class="token number">2018</span><span class="token operator">-</span><span class="token number">04</span><span class="token operator">-</span><span class="token number">02</span> <span class="token number">20</span><span class="token punctuation">:</span><span class="token number">30</span><span class="token punctuation">:</span><span class="token number">52.122132</span><span class="token punctuation">:</span> I tensorflow<span class="token operator">/</span>cc<span class="token operator">/</span>saved_model<span class="token operator">/</span>loader<span class="token punctuation">.</span>cc<span class="token punctuation">:</span><span class="token number">289</span><span class="token punctuation">]</span> SavedModel load <span class="token keyword">for</span> tags <span class="token punctuation">{</span> myTag <span class="token punctuation">}</span><span class="token punctuation">;</span> Status<span class="token punctuation">:</span> success<span class="token punctuation">.</span> Took <span class="token number">216855</span> microseconds<span class="token punctuation">.</span>  
+Result value<span class="token punctuation">:</span> <span class="token punctuation">[</span><span class="token punctuation">[</span><span class="token number">0.5441803</span><span class="token punctuation">]</span><span class="token punctuation">]</span>  
+</code></pre>
+
+<h2 id="someperformancenumbers">Some Performance Numbers</h2>
+
+<p>Recall the model was:</p>
+
+<p>3x3x32 Convolutional Layer <br>
+3x3x32 Convolutional Layer <br>
+2x2 Max Pool Layer <br>
+64 Node Fully Connected Layer with Dropout <br>
+1 Sigmoid output Layer</p>
+
+<p><strong>For Python</strong>:</p>
+
+<ul>
+<li><strong>CPU</strong>: - <mark>~2.72s</mark> to warm up and run one inference and <mark>~0.049s</mark> for each inference after</li>
+<li><strong>GPU</strong>: - <mark>~3.52s</mark> to warm up and run one inference and <mark>~0.009s</mark> for each inference after</li>
+<li><strong>Saved Model Size (HDF5)</strong> <mark>242MB</mark></li>
+</ul>
+
+<p><strong>For Go</strong>:</p>
+
+<ul>
+<li><strong>CPU</strong>: - <mark>~0.255s</mark> to warm up and run one inference and <mark>~0.045s</mark> for each inference after</li>
+<li><strong>GPU</strong>: - N/A</li>
+<li><strong>Saved Model Size(Protobuf binaries)</strong> <mark>236MB</mark></li>
+</ul>
+
+<p>I didn't run it too many times so take it with a grain of salt. I did try to keep the test python code the same as the Go one with a small dummy tensor:</p>
+
+<pre><code class="language-python">%%time
+from keras.preprocessing import image  
+from keras.models import load_model  
+import numpy as np  
+model = load_model("model.h5")  
+img = np.zeros((1,250,250,3))  
+x = np.vstack([img]) # just append to this if we have more than one image.  
+classes = model.predict_classes(x)  
+print(classes)  
+</code></pre>
+
+<p>That's the code for the first run. Just comment out the imports and model loading afterwards for consecutive runs. the <code>%%time</code> is to measure the execution time of the Jupyter Notebook Cell.</p>
+
+<p>It goes without saying that the Go docker container would be much smaller than the Python one and the web frameworks would probably be the big differentiation between Python and Go.</p>
+
+<p>Here's a <a href="https://medium.com/@tschundeee/express-vs-flask-vs-go-acc0879c2122">writeup</a> by Bijan on some performance on web frameworks between Node, Go and Python. I'll put the summary of a couple relevant ones here:  </p>
+
+<pre class=" language-bash"><code class=" language-bash">Python <span class="token operator">+</span> Flask<span class="token punctuation">:</span>  
+<span class="token number">11751</span> Requests<span class="token operator">/</span>sec <span class="token operator">=</span><span class="token operator">&gt;</span> <span class="token number">16393</span> requests <span class="token keyword">in</span> 30s  
+Average Latency <span class="token number">55</span><span class="token punctuation">.</span>54ms
+
+PyPy2<span class="token punctuation">.</span>7 Python <span class="token operator">+</span> Twisted<span class="token punctuation">:</span>  
+<span class="token number">12633</span> Requests<span class="token operator">/</span>sec <span class="token operator">=</span><span class="token operator">&gt;</span> <span class="token number">379001</span> requests <span class="token keyword">in</span> 30s
+
+Golang <span class="token operator">+</span> bmizerany Pat <span class="token operator">+</span> GOMAXPROCS<span class="token punctuation">(</span><span class="token number">7</span><span class="token punctuation">)</span><span class="token punctuation">:</span>  
+<span class="token number">51684</span> Requests<span class="token operator">/</span>sec <span class="token operator">=</span><span class="token operator">&gt;</span> <span class="token number">1550508</span> requests <span class="token keyword">in</span> 30s
+
+Golang <span class="token operator">+</span> Gorilla Pat <span class="token punctuation">(</span>using Gorillas Muxer<span class="token punctuation">)</span>  
+<span class="token number">37756</span> Requests<span class="token operator">/</span>sec <span class="token operator">=</span><span class="token operator">&gt;</span> <span class="token number">1132689</span> requests <span class="token keyword">in</span> 30s  
+Average Latency <span class="token number">1</span><span class="token punctuation">.</span>71ms
+
+Golang <span class="token punctuation">(</span>no external dependencies<span class="token punctuation">)</span>  
+<span class="token number">63300</span> Requests<span class="token operator">/</span>sec  
+</code></pre>
+
+<p>I'll have to try it with Go + GPU combo to see how it performs but I suspect very similarly.</p>
+
+<p>Do you use Go to serve up your models in prod? I'd love to know about your experience. Drop me an email or comment.</p>
+    </section>
+
+  </article>
+
+  <section class="post-comments">
+  <div id="disqus_thread"><iframe id="dsq-app8557" name="dsq-app8557" allowtransparency="true" frameborder="0" scrolling="no" tabindex="0" title="Disqus" width="100%" src="./Running a Keras _ TensorFlow Model in Golang - Tony Truong_files/saved_resource.html" style="width: 1px !important; min-width: 100% !important; border: none !important; overflow: hidden !important; height: 1070px !important;" horizontalscrolling="no" verticalscrolling="no"></iframe><iframe id="indicator-north" name="indicator-north" allowtransparency="true" frameborder="0" scrolling="no" tabindex="0" title="Disqus" style="width: 1010px !important; border: none !important; overflow: hidden !important; top: 0px !important; min-width: 1010px !important; max-width: 1010px !important; position: fixed !important; z-index: 2147483646 !important; height: 0px !important; min-height: 0px !important; max-height: 0px !important; display: none !important;" src="./Running a Keras _ TensorFlow Model in Golang - Tony Truong_files/saved_resource(1).html"></iframe><iframe id="indicator-south" name="indicator-south" allowtransparency="true" frameborder="0" scrolling="no" tabindex="0" title="Disqus" style="width: 1010px !important; border: none !important; overflow: hidden !important; bottom: 0px !important; min-width: 1010px !important; max-width: 1010px !important; position: fixed !important; z-index: 2147483646 !important; height: 0px !important; min-height: 0px !important; max-height: 0px !important; display: none !important;" src="./Running a Keras _ TensorFlow Model in Golang - Tony Truong_files/saved_resource(2).html"></iframe></div>
+  <script type="text/javascript">
+  // required: replace example with your forum shortname
+  var disqus_shortname = 'devsights';
+  /* * * DON'T EDIT BELOW THIS LINE * * */
+  (function() {
+  var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+  dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+  (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+  })();
+  </script>
+  <noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+  
+</section>
+
+
+      <footer>
+  <span class="copyright">
+    © 2018. All rights reserved. Built with <a href="https://ghost.org/" target="_blank">Ghost</a> and <a href="https://github.com/Kikobeats/uno-zen" target="_blank">Uno Zen</a> theme.
+  </span>
+</footer>
+    </section>
+  </article>
+
+  <!-- You can safely delete this line if your theme does not require jQuery -->
+<script type="text/javascript" src="./Running a Keras _ TensorFlow Model in Golang - Tony Truong_files/jquery-1.11.3.min.js"></script><iframe style="display: none;" src="./Running a Keras _ TensorFlow Model in Golang - Tony Truong_files/saved_resource(3).html"></iframe>
+  <script type="text/javascript" src="./Running a Keras _ TensorFlow Model in Golang - Tony Truong_files/uno.js"></script>
+  <script type="text/javascript" src="./Running a Keras _ TensorFlow Model in Golang - Tony Truong_files/prism.js"></script>
+  <script>
+  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+  })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+  ga('create', 'UA-51490091-1', 'auto');
+  ga('require', 'linkid', 'linkid.js');
+  ga('send', 'pageview');
+</script>
+
+
+</body></html>
