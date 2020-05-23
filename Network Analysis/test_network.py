@@ -67,9 +67,14 @@ edge_colors = [e[2]['attr_dict']['color'] for e in list(g.edges(data=True))]
 # Preview first 10
 edge_colors[0:10]
 
-
 plt.figure(figsize=(8, 6))
-nx.draw(g, pos=node_positions, edge_color=edge_colors, node_size=10, node_color='black')
+axes = plt.subplot(1,1,1)
+nx.draw(g, pos=node_positions, ax=axes, edge_color=edge_colors, node_size=10, node_color='black')
+#nx.draw_spectral(g, edge_color=edge_colors, node_size=10, node_color='black')
+#nx.draw_spring(g, edge_color=edge_colors, node_size=10, node_color='black')
+#nx.draw_kamada_kawai(g, edge_color=edge_colors, node_size=10, node_color='black')
+#nx.draw_planar(g, edge_color=edge_colors, node_size=10, node_color='black')
+#nx.draw_shell(g, edge_color=edge_colors, node_size=10, node_color='black')
 plt.title('Graph Representation of Sleeping Giant Trail Map', size=15)
 plt.show()
 
