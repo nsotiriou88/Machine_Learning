@@ -1,3 +1,34 @@
 # Run Jupyter without restrictions for data transfer pipeline (for Plotly slider)
 
 jupyter notebook --NotebookApp.iopub_data_rate_limit=1e10
+
+
+
+# Notes from Sportable
+
+ssh -L 8000:localhost:8888 sportable@192.168.1.150 (local port -----> remote port)
+
+source virtual/bin/activate
+
+# Create a Virtual environment and Access it:
+	
+	python3 -m venv my_env_name --> create
+	
+	source my_env/bin/activate  --> acticate
+
+
+# Run Jupyter on server and check for token/password:
+
+	ssh -L 8000:localhost:8888 username@your_server_ip  --> (link: local port 8000 <-----> remote port 8888;
+	if the port is bind, it will open the next one available etc. 8889)
+
+	source virtual/bin/activate    --> acticate
+
+	jupyter lab/notebook --no-browser --port=8888 (or any other port, but need to forward it on ssh command)
+
+
+# Run Jupyter on server and check for token/password::
+
+	Open any browser and copy the http://localhost:8000/?token=********* -->access it through local machine at
+	browser 8000 or any other forwarded port from the SSH command.
+
