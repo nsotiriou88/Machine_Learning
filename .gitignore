@@ -8,7 +8,6 @@
 *DS_Store
 *.pyc
 *.ipynb_notebooks
-*.ipynb
 *.log
 
 # Environments
