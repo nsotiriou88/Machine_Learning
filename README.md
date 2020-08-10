@@ -52,7 +52,15 @@ It includes a lot of commends on each individual template, so that it is easier 
 
 	Examples of Model techniques for multiple output dependent variables. MultiOutputRegressor sklearn Class examples.
 
-## Material Folders
+## Modeling
+
+Various additional modeling scripts, like scorecard etc.
+
+## Reading Material
+
+Reading Material.
+
+## Other Folders
 
 Folders that include interesting reading and coding material.
 
