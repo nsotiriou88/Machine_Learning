@@ -1,3 +1,32 @@
+# -*- coding: utf-8 -*-
+
+import numpy as np
+import pandas as pd
+import matplotlib.pyplot as plt
+import warnings
+
+def eva_dfrocpr(df):
+    def n0(x): return sum(x==0)
+    def n1(x): return sum(x==1)
+    dfrocpr = df.sort_values('pred')\
+      .groupby('pred')['label'].agg([n0,n1,len])\
+      .reset_index().rename(columns={'n0':'countN','n1':'countP','len':'countpred'})\
+      .assign(
+        FN = lambda x: np.cumsum(x.countP), 
+        TN = lambda x: np.cumsum(x.countN) 
+      ).assign(
+        TP = lambda x: sum(x.countP) - x.FN, 
+        FP = lambda x: sum(x.countN) - x.TN
+      ).assign(
+        TPR = lambda x: x.TP/(x.TP+x.FN), 
+        FPR = lambda x: x.FP/(x.TN+x.FP), 
+        precision = lambda x: x.TP/(x.TP+x.FP), 
+        recall = lambda x: x.TP/(x.TP+x.FN)
+      ).assign(
+        F1 = lambda x: 2*x.precision*x.recall/(x.precision+x.recall)
+      )
+    return dfrocpr
+
 def perf_eva(label, pred, title=None, groupnum=None, plot_type=["ks", "roc"], show_plot=True, positive="bad|1", seed=186):
     '''
     KS, ROC, Lift, PR
