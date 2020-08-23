@@ -3,6 +3,13 @@
 jupyter notebook --NotebookApp.iopub_data_rate_limit=1e10
 
 
+# Install Jupyter Extensions
+
+-pip install jupyter_contrib_nbextensions
+-pip install jupyter_nbextensions_configurator
+-jupyter contrib nbextension install
+-(Enable from nbextension tab)
+
 
 # Notes from Sportable
 
