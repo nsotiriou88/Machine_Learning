@@ -385,3 +385,32 @@ def metrics_slider_plot(X_test, y_test, clf, models, w=None):
                                  angularaxis=dict(direction='clockwise', period=5)))
     
     fig.show()
+
+
+def ABS_SHAP(df_shap,df):
+    #import matplotlib as plt
+    # Make a copy of the input data
+    shap_v = pd.DataFrame(df_shap)
+    feature_list = df.columns
+    shap_v.columns = feature_list
+    df_v = df.copy().reset_index().drop('index',axis=1)
+    
+    # Determine the correlation in order to plot with different colors
+    corr_list = list()
+    for i in feature_list:
+        b = np.corrcoef(shap_v[i],df_v[i])[1][0]
+        corr_list.append(b)
+    corr_df = pd.concat([pd.Series(feature_list),pd.Series(corr_list)],axis=1).fillna(0)
+    # Make a data frame. Column 1 is the feature, and Column 2 is the correlation coefficient
+    corr_df.columns  = ['Variable','Corr']
+    corr_df['Sign'] = np.where(corr_df['Corr']>0,'red','blue')
+    
+    # Plot it
+    shap_abs = np.abs(shap_v)
+    k=pd.DataFrame(shap_abs.mean()).reset_index()
+    k.columns = ['Variable','SHAP_abs']
+    k2 = k.merge(corr_df,left_on = 'Variable',right_on='Variable',how='inner')
+    k2 = k2.sort_values(by='SHAP_abs',ascending = True)
+    colorlist = k2['Sign']
+    ax = k2.plot.barh(x='Variable',y='SHAP_abs',color = colorlist, figsize=(5,6),legend=False)
+    ax.set_xlabel("SHAP Value (Red = Positive Impact)")
