@@ -3,6 +3,7 @@
 ## Intro
 
 This is a repo for Machince learning algorithms; Python and R.
+[![Generic badge](https://img.shields.io/badge/VERSION-1.0-GREEN.svg)](https://shields.io/)
 
 It includes a lot of commends on each individual template, so that it is easier to use it as an off-the-shelf solution, with minimal effort.
 
