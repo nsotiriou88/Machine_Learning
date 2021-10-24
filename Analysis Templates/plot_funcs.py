@@ -10,6 +10,9 @@ import pandas as pd
 import seaborn as sns
 import matplotlib.pyplot as plt
 import plotly.graph_objects as go
+import plotly.offline as plty
+from plotly.subplots import make_subplots
+from sklearn import metrics
 from sklearn.metrics import roc_auc_score, roc_curve, confusion_matrix
 
 
@@ -25,6 +28,7 @@ def missing_data(data):
         dtype = str(data[col].dtype)
         types.append(dtype)
     tt['Types'] = types
+
     return(np.transpose(tt))
 
 
@@ -43,6 +47,8 @@ def plot_feature_scatter(df1, df2, features, grid=(5,2)):
         plt.scatter(df1[feature], df2[feature], marker='+')
         plt.xlabel(feature, fontsize=9)
     plt.show()
+
+    return
 
 
 def plot_feature_categ(df1, feature, target, order=None):
@@ -69,6 +75,8 @@ def plot_feature_categ(df1, feature, target, order=None):
         plt.xticks(rotation=45)
     plt.show()
 
+    return
+
 
 def plot_feature_categ_single_graph(df1, feature, target):
     '''
@@ -92,6 +100,8 @@ def plot_feature_categ_single_graph(df1, feature, target):
     plt.xticks(rotation=45)
     plt.show()
 
+    return
+
 
 def corr_heatmap_plot(df, cmap='coolwarm'):
     '''
@@ -110,6 +120,8 @@ def corr_heatmap_plot(df, cmap='coolwarm'):
     ax.set_xticklabels(corr.columns)
     ax.set_yticklabels(corr.columns)
     plt.show()
+
+    return
 
 
 def plot_feature_distribution(df1, df2, label1, label2, features, grid=(2, 5)):
@@ -133,6 +145,8 @@ def plot_feature_distribution(df1, df2, label1, label2, features, grid=(2, 5)):
         plt.tick_params(axis='y', which='major', labelsize=6)
     plt.show()
 
+    return
+
 
 def plot_new_feature_distribution(df1, df2, label1, label2, features, grid=(2, 4)):
     '''
@@ -155,6 +169,8 @@ def plot_new_feature_distribution(df1, df2, label1, label2, features, grid=(2, 4
         plt.tick_params(axis='y', which='major', labelsize=8)
     plt.show()
 
+    return
+
 
 def confusion_mat_plot(y_test, y_pred):
     '''
@@ -174,7 +190,7 @@ def confusion_mat_plot(y_test, y_pred):
     plt.title('Confusion Matrix')
     for i in range(len(ybins)-1):
         for j in range(len(xbins)-1):
-            ax.text(xbins[j]+0.25,ybins[i]+0.25,int(hist[i,j]),color='black',
+            ax.text(xbins[i]+0.25,ybins[j]+0.25,int(hist[i,j]),color='black',
             ha='center',va='center', fontweight='bold')
     ax.set_xticks([0.25, 0.75])
     ax.set_yticks([0.25, 0.75])
@@ -209,6 +225,86 @@ def confusion_mat_plot(y_test, y_pred):
     # fpr = fp/(fp+tn) - false-positive rate
     
     return (accuracy, precision, recall, specificity, f_score)
+
+
+def plot_confusion_matrix_slider(y_test, y_proba, cmap='Blues', savefig=False):
+    '''
+    Interactive plot for confusion matrix on different cut-off points with
+    slider. Uses Plotly library on Jupyter notebook (need Javascript on
+    background).
+    '''
+    sns.set_style('whitegrid')
+    fig = make_subplots(rows=1, cols=2, shared_xaxes=False, shared_yaxes=False,
+                        subplot_titles=('Confusion Matrix', 'ML Metrics'),
+                        horizontal_spacing=0.13)
+    metrics_labels = ['Accuracy', 'Precision', 'Recall', 'Specificity', 'F-Score']
+    pred_labels = ['Negative', 'Positive']
+
+    for cutoff in np.arange(0.2, 0.825, 0.025):
+        metrics = [0, 0, 0, 0, 0]
+        y_pred = np.where(y_proba < cutoff, 0, 1)
+        cm = confusion_matrix(y_test, y_pred)
+        tn, fp, fn, tp = confusion_matrix(y_test, y_pred).ravel()
+        total = np.sum(cm)
+        metrics[0] = round((tp+tn)/total*100, 1) # Accuracy
+        metrics[1] = round(tp/(tp+fp)*100, 1) # Precision
+        metrics[2] = round(tp/(tp+fn)*100, 1) # Recall/Sensitivity/TPR
+        metrics[3] = round(tn/(tn+fp)*100, 1) # Specificity
+        metrics[4] = round(2*metrics[1]*metrics[2]/(metrics[1]+metrics[2]), 1) # F-Score
+    
+        #add bar plot for metrics
+        fig.add_trace(go.Bar(x=metrics, y=metrics_labels, text=metrics, visible=False,
+                            textposition='inside', showlegend=False, orientation='h',
+                            marker=dict(color='rgba(158, 202, 225, 0.6)',
+                            line=dict(color='rgba(8, 48, 107, 0.8)', width=1.5))),
+                            row=1, col=1)
+
+        # add heatmap/cm plots
+        z_data = [[tn,fp], [fn,tp]]
+        fig.add_trace(go.Heatmap(x=pred_labels, y=pred_labels,
+                    z=z_data, colorscale=cmap, hoverinfo='z',
+                    visible=False), row=1, col=2)
+        
+        #annotate heatmap
+        fig.add_trace(go.Scatter(text=[str(cm[0,0]), str(cm[0,1]), str(cm[1,0]),
+                    str(cm[1,1])], visible=False,
+                    x=['Negative', 'Positive', 'Negative', 'Positive'],
+                    y=['Negative', 'Negative', 'Positive', 'Positive'],
+                    mode='text', textfont=dict(size=16, color='black'),
+                    showlegend=False), row=1, col=2)
+    
+    # make one step visible (n models in total)
+    # 12+1th element is the 50% cut-off
+    plots = 3 # (Bar plots, heatmap and annotation scatterplot for heatmap)
+    for j in range(plots):
+        fig.data[12*plots+j].visible = True
+    
+    # Create and add slider
+    cutoffs = []
+    for i in range(int(len(fig.data)/plots)):
+        cutoff = dict(method='restyle', args=['visible', [False]*len(fig.data)],
+                      label=str(20+i*2.5)+'%',)
+        for j in range(plots):
+            cutoff['args'][1][i*plots+j] = True # Toggle (i*6+j)'th trace to "visible"
+        cutoffs.append(cutoff)
+    
+    sliders = [dict(active=12, currentvalue={'prefix': 'Cut-off: '},
+                    pad={'t': 50}, steps=cutoffs)]
+    
+    fig.update_layout(sliders=sliders, showlegend=True,
+                      title='Model Comparison on Different Cut-offs')
+    
+    # updated axes labels
+    fig.update_xaxes(tickvals=[0, 20, 40, 60, 80, 100], range=[0,100], row=1, col=1)
+    fig.update_xaxes(title_text='Predicted Label', row=1, col=2)
+    fig.update_yaxes(title_text='True Label', row=1, col=2)
+    
+    # Show and save figure
+    fig.show()
+    if savefig==True:
+        plty.plot(fig, filename='confmat_slider.html', auto_open=False)
+
+    return
 
 
 def auc_plot(X_test, y_test, clf, w=None):
@@ -265,47 +361,72 @@ def auc_plot_all(X_test, y_test, clf, models, w=None):
     plt.plot([0,1], [0,1], 'c--')
     plt.title('ROC Curve for All Models', fontsize=22)
     plt.legend(loc=4)
-    plt.show();
+    plt.show()
+
+    return
 
 
-def plot_models_radar(df):
+def plot_models_radar(X_list, y_list, clf_list, models, w_list=None,
+    cutoff=0.5, fill=True, figsize=(12,12)):
     '''
     Plot of all model metrics in one radar graph for 50% cut-off.
     '''
     sns.set_style('whitegrid')
-    fig, ax = plt.subplots(figsize=(12, 12), subplot_kw=dict(polar=True))
+    fig, ax = plt.subplots(figsize=figsize, subplot_kw=dict(polar=True))
 
-    labels = df.index.to_list()
-    theta = np.linspace(0, 2*np.pi, len(labels), endpoint=False).tolist()
+    if w_list==None:
+        w_list = [None for i in range(len(models))]
+    theta_labels = ['Accuracy', 'Precision', 'Recall', 'Specificity',
+                    'F-Score']
+    theta = np.linspace(0, 2*np.pi, len(theta_labels), endpoint=False).tolist()
     theta += theta[:1]
-    models = df.columns
+    if cutoff > 1 or cutoff < 0:
+        cutoff = 0.5
+    cutoff_str = str(round(cutoff*100,0))
 
-    for i in range(len(models)):
-        values = df[models[i]].to_list()
+    for i, model in enumerate(models):
+        metrics = [0,0,0,0,0,0]
+        #calculate gini
+        y_pred_proba = clf_list[i].predict_proba(X_list[i])[::,1]
+        fpr, tpr, _ = roc_curve(y_list[i], y_pred_proba, sample_weight=w_list[i])
+        AUC = roc_auc_score(y_list[i], y_pred_proba, sample_weight=w_list[i])
+        Gini = (2*AUC-1)*100
 
-        # The plot is a circle, so we need to "complete the loop"
-        # and append the start value and the end value.
-        values += values[:1]
+        #calculate other metrics based on cut-off point
+        y_pred = np.where(y_pred_proba < cutoff, 0, 1)
+        cm = confusion_matrix(y_list[i], y_pred)
+        tn, fp, fn, tp = confusion_matrix(y_list[i], y_pred).ravel()
+        total = np.sum(cm)
+        metrics[0] = (tp+tn)/total*100 # Accuracy
+        metrics[1] = tp/(tp+fp)*100 # Precision
+        metrics[2] = tp/(tp+fn)*100 # Recall/Sensitivity/TPR
+        metrics[3] = tn/(tn+fp)*100 # Specificity
+        metrics[4] = 2*metrics[1]*metrics[2]/(metrics[1]+metrics[2]) # F-Score
+        metrics[5] = metrics[0]
 
-        ax.plot(theta, values, linewidth=2, label=models[i])
-        ax.fill(theta, values, alpha=0.2)
+        # add radar plots
+        ax.plot(theta, metrics, linewidth=2, label=model+'(Gini:'+str(round(Gini,1))+'%)')
+        if fill:
+            ax.fill(theta, metrics, alpha=0.2)
     
     # Fix axis to go in the right order and start from 12 o'clock
     ax.set_theta_offset(np.pi/2)
     ax.set_theta_direction(-1)
 
     # Draw axis lines for each angle and label
-    ax.set_thetagrids(np.degrees(theta), labels)
-    ax.set_ylim(40, 100)
-    ax.set_rlabel_position(180/len(labels))
-
-    plt.title('Model Comparison - 50% cut-off point', fontsize=22)
+    theta_labels.append('Accuracy')
+    ax.set_thetagrids(np.degrees(theta), theta_labels)
+    ax.set_ylim(0, 100)
+    ax.set_rlabel_position(180/len(theta_labels))
+    plt.title('Model Comparison - '+cutoff_str+'% cut-off point', fontsize=22)
     plt.legend(loc='lower right')
+    plt.show()
 
-    plt.show();
+    return
 
 
-def metrics_slider_plot(X_test, y_test, clf, models, w=None):
+def plot_model_metrics_radar_slider(X_list, y_list, clf_list, models, w_list=None,
+    savefig=False):
     '''
     Interactive plot for metrics and Gini with slider for different
     cut-off points. Works with Plotly and Javascript (in Jupyter
@@ -313,22 +434,22 @@ def metrics_slider_plot(X_test, y_test, clf, models, w=None):
 
     Parameters
     ----------
-    X_test: list of all X_test datasets for prediction.
+    X_list: list of all X_test datasets for prediction.
     
-    y_test: list of all y_test datasets.
+    y_list: list of all y_test datasets.
     
-    clf: list of trained  classifiers.
+    clf_list: list of trained  classifiers.
     
     models: list of strings with a description about the model.
     
-    w: list of sample weights, if applicable to the model.
+    w_list: list of sample weights, if applicable to the model.
     For mixed models, use [w1, None, w3, ...].
     '''
     sns.set_style('whitegrid')
     fig = go.Figure()
 
-    if w==None:
-        w = [None for i in range(len(models))]
+    if w_list==None:
+        w_list = [None for i in range(len(models))]
     theta_labels = ['Accuracy', 'Precision', 'Recall', 'Specificity',
                     'F-Score', 'Accuracy']
     color_pallete = ['peru', 'darkviolet', 'deepskyblue', 'black', 'yellow'
@@ -338,17 +459,15 @@ def metrics_slider_plot(X_test, y_test, clf, models, w=None):
         for i, model in enumerate(models):
             metrics = [0, 0, 0, 0, 0, 0]
             # calculate gini
-            y_pred_proba = clf[i].predict_proba(X_test[i])[::, 1]
-            fpr, tpr, _ = roc_curve(y_test[i], y_pred_proba, sample_weight=w[i])
-            AUC = roc_auc_score(y_test[i], y_pred_proba, sample_weight=w[i])
+            y_pred_proba = clf_list[i].predict_proba(X_list[i])[::, 1]
+            fpr, tpr, _ = roc_curve(y_list[i], y_pred_proba, sample_weight=w_list[i])
+            AUC = roc_auc_score(y_list[i], y_pred_proba, sample_weight=w_list[i])
             Gini = (2*AUC-1)*100
 
             # calculate other metrics based on cut-off point
             y_pred = np.where(y_pred_proba < cutoff, 0, 1)
-            cm = confusion_matrix(y_test[i], y_pred)
-            tn, fp, fn, tp = confusion_matrix(y_test[i], y_pred).ravel()
-            print(cm)
-            print(len(tn),len(fp),len(fn),len(tp))
+            cm = confusion_matrix(y_list[i], y_pred)
+            tn, fp, fn, tp = confusion_matrix(y_list[i], y_pred).ravel()
             total = np.sum(cm)
             metrics[0] = (tp+tn)/total*100 # Accuracy
             metrics[1] = tp/(tp+fp)*100 # Precision
@@ -381,10 +500,15 @@ def metrics_slider_plot(X_test, y_test, clf, models, w=None):
     
     fig.update_layout(sliders=sliders, showlegend=True,
                       title='Model Comparison on Different Cut-offs',
-                      polar=dict(radialaxis_angle=30, radialaxis_range=[20, 100],
-                                 angularaxis=dict(direction='clockwise', period=5)))
+                      polar=dict(radialaxis_angle=30, radialaxis_range=[0, 100],
+                                 angularaxis=dict(direction='clockwise', period=5),
+                                 angularaxis_dtick=20))
     
     fig.show()
+    if savefig==True:
+        plty.plot(fig, filename='radar_slider.html', auto_open=False)
+
+    return
 
 
 def ABS_SHAP(df_shap,df):
@@ -414,3 +538,5 @@ def ABS_SHAP(df_shap,df):
     colorlist = k2['Sign']
     ax = k2.plot.barh(x='Variable',y='SHAP_abs',color = colorlist, figsize=(5,6),legend=False)
     ax.set_xlabel("SHAP Value (Red = Positive Impact)")
+
+    return
